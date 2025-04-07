@@ -1,18 +1,24 @@
 package Controler;
 
 
+import Model.Obstacle;
 import Model.Player;
-
+//import java.util.*;
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
+import java.util.List;
 
 public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private Timer timer;
+    private java.util.List<Obstacle> obstacles = new ArrayList<>();
+    private int obstacleTimer = 0;
     private Player player;
     private double hexagonAngle = 0;
-    private static final int HEX_RADIUS = 100;
-    private static final double STEP = 0.02;
+    private static final int HEX_RADIUS = 90;
+    private static final double STEP = 0.04;
     private int currentEdge = 0;
     private double edgeProgress = 0.0;
     private Point[] hexVertices = new Point[6];
@@ -22,7 +28,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         setBackground(Color.BLACK);
         setFocusable(true);
         addKeyListener(this);
-        timer = new Timer(16, this); // ~60 FPS
+        timer = new Timer(16, this); 
     }
 
     public void start() {
@@ -51,27 +57,94 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         g2d.drawPolygon(hex);
 
 
+// Get edge points
         Point a = hexVertices[currentEdge];
         Point b = hexVertices[(currentEdge + 1) % 6];
-        double cx = a.x + (b.x - a.x) * edgeProgress;
-        double cy = a.y + (b.y - a.y) * edgeProgress;
-        double edgeAngle = Math.atan2(b.y - a.y, b.x - a.x);
 
+// Edge vector
+        double dx = b.x - a.x;
+        double dy = b.y - a.y;
+        double edgeLength = Math.sqrt(dx * dx + dy * dy);
 
-        double spread = Math.PI / 15;
-        int leftX = (int) (cx + 10 * Math.cos(edgeAngle - spread));
-        int leftY = (int) (cy + 10 * Math.sin(edgeAngle - spread));
-        int rightX = (int) (cx + 10 * Math.cos(edgeAngle + spread));
-        int rightY = (int) (cy + 10 * Math.sin(edgeAngle + spread));
+// Unit edge direction
+        double ux = dx / edgeLength;
+        double uy = dy / edgeLength;
 
+// Normal vector
+        double nx = -uy;
+        double ny = ux;
+
+// Position along edge
+        double edgeCenterX = a.x + dx * edgeProgress;
+        double edgeCenterY = a.y + dy * edgeProgress;
+
+// Offset center outward by gap
+        double gap = -10;
+        double cx = edgeCenterX + gap * nx;
+        double cy = edgeCenterY + gap * ny;
+
+// Triangle size
+        double baseHalf = 8;
+        double tipLength = -14;
+
+// Base points
+        double baseX1 = cx + baseHalf * ux;
+        double baseY1 = cy + baseHalf * uy;
+        double baseX2 = cx - baseHalf * ux;
+        double baseY2 = cy - baseHalf * uy;
+
+// Tip point
+        double tipX = cx + tipLength * nx;
+        double tipY = cy + tipLength * ny;
+
+// Draw cursor
         g2d.setColor(Color.CYAN);
-        g2d.fillPolygon(new int[]{leftX, (int) cx, rightX}, new int[]{leftY, (int) cy, rightY}, 3);
+        g2d.fillPolygon(
+                new int[]{(int) tipX, (int) baseX1, (int) baseX2},
+                new int[]{(int) tipY, (int) baseY1, (int) baseY2},
+                3
+        );
+
+
+        for (Obstacle ob : obstacles) {
+            ob.draw(g2d, hexagonAngle);
+        }
+
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         hexagonAngle += 0.01;
         repaint();
+
+
+        hexagonAngle += 0.01;
+        obstacleTimer++;
+        if (obstacleTimer % 60 == 0) {
+            Set<Integer> chosenEdges = new HashSet<>();
+            int gapEdge = new Random().nextInt(6); // اون یه دیواری که حداقل باید باشه
+            for (int i = 0; i < 6; i++) {
+                if (i != gapEdge) {
+                    chosenEdges.add(i);
+                }
+            }
+            // حداقل یه دیوار
+            int toRemove = new Random().nextInt(5); 
+            List<Integer> list = new ArrayList<>(chosenEdges);
+            Collections.shuffle(list);
+            for (int i = 0; i < toRemove; i++) {
+                chosenEdges.remove(list.get(i));
+            }
+            for (int edge : chosenEdges) {
+                obstacles.add(new Obstacle(edge));
+            }
+        }
+        for (Obstacle ob : obstacles) {
+            ob.update();
+        }
+        obstacles.removeIf(Obstacle::isOffScreen);
+        repaint();
+
     }
 
     @Override
