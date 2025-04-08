@@ -29,7 +29,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private double edgeProgress = 0.0;
     private Point[] hexVertices = new Point[6];
     private int score = 0;
-
+    double obstacleSpeed = 1.5;
+    double rotatingSpeed = 0.01;
 
 
     public GamePanel(Player player) {
@@ -140,15 +141,15 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             score++;
         }
 
-
-
-        hexagonAngle += 0.01;
+        if (score % 50 ==0){
+            rotatingSpeed+=0.001;
+        }
+        hexagonAngle += rotatingSpeed;
         repaint();
 
-
-        hexagonAngle += 0.01;
+        //hexagonAngle += 0.01;
         obstacleTimer++;
-        if (obstacleTimer % 60 == 0) {
+        if (obstacleTimer % 100 == 0) {
             Set<Integer> chosenEdges = new HashSet<>();
             int gapEdge = new Random().nextInt(6); // اون یه دیواری که حداقل باید باشه
             for (int i = 0; i < 6; i++) {
@@ -167,8 +168,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 obstacles.add(new Obstacle(edge));
             }
         }
+        if (score%50 == 0){
+            obstacleSpeed+=0.05;
+        }
         for (Obstacle ob : obstacles) {
-            ob.update();
+            ob.update(obstacleSpeed);
         }
 
         //check collision

@@ -5,7 +5,7 @@ import java.awt.*;
 public class Obstacle {
     private int edgeIndex;
     private double distance;
-    private static final double SPEED = 1.5;
+    //private static final double SPEED = 1.5;
     private static final int THICKNESS = 20;
     private static final int HEX_RADIUS = 100;
 
@@ -14,8 +14,8 @@ public class Obstacle {
         this.distance = 400;
     }
 
-    public void update() {
-        distance -= SPEED;
+    public void update(double Speed) {
+        distance -= Speed;
     }
 
 
