@@ -23,6 +23,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private double edgeProgress = 0.0;
     private Point[] hexVertices = new Point[6];
 
+
     public GamePanel(Player player) {
         this.player = player;
         setBackground(Color.BLACK);
@@ -142,6 +143,21 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         for (Obstacle ob : obstacles) {
             ob.update();
         }
+
+        //check collision
+        double dx = hexVertices[currentEdge].x - hexVertices[(currentEdge + 1) % 6].x;
+        double dy = hexVertices[currentEdge].y - hexVertices[(currentEdge + 1) % 6].y;
+        double edgeLen = Math.sqrt(dx * dx + dy * dy);
+        double cursorDistance = Math.sqrt(Math.pow(edgeLen * edgeProgress, 2) + Math.pow(HEX_RADIUS + 10, 2));
+
+        for (Obstacle ob : obstacles) {
+            if (ob.isColliding(currentEdge, cursorDistance, 6)) {
+                System.out.println("Collision detected. Bitches");
+                timer.stop();
+                return;
+            }
+        }
+
         obstacles.removeIf(Obstacle::isOffScreen);
         repaint();
 

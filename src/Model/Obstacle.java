@@ -18,10 +18,16 @@ public class Obstacle {
         distance -= SPEED;
     }
 
+
     public boolean isOffScreen() {
         return distance < HEX_RADIUS ;
                 //- THICKNESS;
     }
+
+    public boolean isColliding(int cursorEdge, double cursorDistance, double tolerance) {
+        return this.edgeIndex == cursorEdge && Math.abs(this.distance - cursorDistance) < tolerance;
+    }
+
 
     public void draw(Graphics2D g2d, double hexagonAngle) {
         double angle = edgeIndex * Math.PI / 3 + hexagonAngle;
