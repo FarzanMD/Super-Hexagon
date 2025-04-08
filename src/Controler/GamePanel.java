@@ -1,6 +1,7 @@
 package Controler;
 
 
+import Model.HistoryRecord;
 import Model.Obstacle;
 import Model.Player;
 //import java.util.*;
@@ -8,8 +9,13 @@ import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
+
+import static Model.HistoryRecord.loadHistory;
+import static Model.HistoryRecord.saveHistory;
 
 public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private Timer timer;
@@ -18,10 +24,12 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private Player player;
     private double hexagonAngle = 0;
     private static final int HEX_RADIUS = 90;
-    private static final double STEP = 0.04;
+    private static final double STEP = 0.08;
     private int currentEdge = 0;
     private double edgeProgress = 0.0;
     private Point[] hexVertices = new Point[6];
+    private int score = 0;
+
 
 
     public GamePanel(Player player) {
@@ -41,6 +49,16 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
+        //drawing score
+        AffineTransform originalTransform = g2d.getTransform();
+
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 20));
+        g2d.drawString("Score: " + score, 20, 30);
+
+        g2d.setTransform(originalTransform);
+        //g2d.translate(getWidth() / 2, getHeight() / 2);
+
         int w = getWidth();
         int h = getHeight();
         g2d.translate(w / 2, h / 2);
@@ -56,6 +74,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             hexVertices[i] = new Point(x, y);
         }
         g2d.drawPolygon(hex);
+
 
 
 // Get edge points
@@ -115,6 +134,14 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        //++ is too fast
+        // score++;
+        if (obstacleTimer % 10 == 0) {
+            score++;
+        }
+
+
+
         hexagonAngle += 0.01;
         repaint();
 
@@ -153,6 +180,12 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         for (Obstacle ob : obstacles) {
             if (ob.isColliding(currentEdge, cursorDistance, 6)) {
                 System.out.println("Collision detected. Bitches");
+                System.out.println("Final Score: " + score);
+
+                List<HistoryRecord> records = loadHistory();
+                records.add(new HistoryRecord(score, player.getName(), LocalDateTime.now().toString()));
+                saveHistory(records);
+
                 timer.stop();
                 return;
             }

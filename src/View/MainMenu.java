@@ -1,7 +1,12 @@
 package View;
 
+import Model.HistoryRecord;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
+
+import static Model.HistoryRecord.loadHistory;
 
 public class MainMenu extends JFrame {
     public MainMenu() {
@@ -15,10 +20,18 @@ public class MainMenu extends JFrame {
         JButton settingsButton = new JButton("Settings");
         JButton exitButton = new JButton("Exit");
 
+
         startButton.addActionListener(e -> {
             dispose();
             new GameSetup();
         });
+
+
+        historyButton.addActionListener(e -> {
+            List<HistoryRecord> records = loadHistory();
+            new HistoryWindow(records).setVisible(true);
+        });
+
 
         JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
         panel.add(startButton);
