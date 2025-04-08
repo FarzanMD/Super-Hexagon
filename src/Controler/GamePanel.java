@@ -76,6 +76,50 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         }
         g2d.drawPolygon(hex);
 
+        //rotating sectors(???)
+        //List<Polygon> sectors = new ArrayList<>();
+        //Point center = new Point(0, 0); // after translate, this is center
+
+        // Land division colors
+        Color[] sectorColors = {
+                new Color(255, 0, 0, 100),     // Red
+                new Color(100, 0, 0, 100),     // Red
+                new Color(255, 0, 0, 100),     // Red
+                new Color(100, 0, 0, 100),     // Red
+                new Color(255, 0, 0, 100),     // Red
+                new Color(100, 0, 0, 100),     // Red
+                //new Color(0, 255, 0, 100),     // Green
+//                new Color(0, 0, 255, 100),     // Blue
+//                new Color(255, 255, 0, 100),   // Yellow
+//                new Color(255, 0, 255, 100),   // Magenta
+//                new Color(0, 255, 255, 100)    // Cyan
+        };
+
+        Point center = new Point(0, 0);
+        int extension = 1000; // how far to extend beyond the hex
+
+        for (int i = 0; i < 6; i++) {
+            // angles for the two bounding edges
+            double angle1 = i * Math.PI / 3 + hexagonAngle;
+            double angle2 = (i + 1) * Math.PI / 3 + hexagonAngle;
+
+            int x1 = (int)(extension * Math.cos(angle1));
+            int y1 = (int)(extension * Math.sin(angle1));
+            int x2 = (int)(extension * Math.cos(angle2));
+            int y2 = (int)(extension * Math.sin(angle2));
+
+            Polygon sector = new Polygon();
+            sector.addPoint(center.x, center.y);
+            sector.addPoint(x1, y1);
+            sector.addPoint(x2, y2);
+
+            g2d.setColor(sectorColors[i]);
+            g2d.fillPolygon(sector);
+        }
+
+
+
+
 
 
 // Get edge points
@@ -181,6 +225,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         double edgeLen = Math.sqrt(dx * dx + dy * dy);
         double cursorDistance = Math.sqrt(Math.pow(edgeLen * edgeProgress, 2) + Math.pow(HEX_RADIUS + 10, 2));
 
+
+        //Game over on collision
         for (Obstacle ob : obstacles) {
             if (ob.isColliding(currentEdge, cursorDistance, 6)) {
                 System.out.println("Collision detected. Bitches");

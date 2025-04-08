@@ -22,6 +22,7 @@ public class MainMenu extends JFrame {
 
         exitButton.addActionListener(e -> {
             dispose();
+            System.exit(0);
         });
 
         startButton.addActionListener(e -> {
