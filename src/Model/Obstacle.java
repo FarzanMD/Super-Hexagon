@@ -11,7 +11,7 @@ public class Obstacle {
 
     public Obstacle(int edgeIndex) {
         this.edgeIndex = edgeIndex;
-        this.distance = 400;
+        this.distance = 600;
     }
 
     public void update(double Speed) {

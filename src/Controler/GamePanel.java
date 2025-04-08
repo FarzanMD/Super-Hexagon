@@ -186,7 +186,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         }
 
         if (score % 50 ==0){
-            rotatingSpeed+=0.001;
+            rotatingSpeed+=0.0002;
         }
         hexagonAngle += rotatingSpeed;
         repaint();
@@ -213,7 +213,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             }
         }
         if (score%50 == 0){
-            obstacleSpeed+=0.05;
+            obstacleSpeed+=0.01;
         }
         for (Obstacle ob : obstacles) {
             ob.update(obstacleSpeed);
