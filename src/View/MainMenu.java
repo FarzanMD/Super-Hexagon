@@ -20,6 +20,9 @@ public class MainMenu extends JFrame {
         JButton settingsButton = new JButton("Settings");
         JButton exitButton = new JButton("Exit");
 
+        exitButton.addActionListener(e -> {
+            dispose();
+        });
 
         startButton.addActionListener(e -> {
             dispose();

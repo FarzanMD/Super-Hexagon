@@ -5,6 +5,8 @@ import Model.HistoryRecord;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class HistoryWindow extends JFrame {
@@ -23,6 +25,9 @@ public class HistoryWindow extends JFrame {
         historyTable = new JTable(tableModel);
 
         // Fill the table
+
+        //i dont know what this shit is doing but it runs it well
+        historyRecords.sort((a, b) -> Integer.compare(b.getScore(), a.getScore()));
         int rank = 1;
         for (HistoryRecord record : historyRecords) {
             tableModel.addRow(new Object[]{

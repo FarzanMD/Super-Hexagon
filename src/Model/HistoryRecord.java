@@ -1,9 +1,11 @@
 package Model;
 import org.json.*;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,28 +49,42 @@ public class HistoryRecord {
             array.put(record.toJson());
         }
 
-        try (FileWriter file = new FileWriter("history.json")) {
+        try (FileWriter file = new FileWriter("src/Model/history.json")) {
             file.write(array.toString(2)); // Pretty print
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     //load
     public static List<HistoryRecord> loadHistory() {
         List<HistoryRecord> records = new ArrayList<>();
         try {
-            String content = new String(Files.readAllBytes(Paths.get("src/Model/history.json")));
+//            if (Files.exists(Path.of("src/Model/history.json"))){
+//                System.out.println("pedarsag");
+//            }
+            String path = "src/Model/history.json";  // Or just "history.json" if that's where you're saving it
+            if (!Files.exists(Paths.get(path))) {
+                return records;  // No file = empty history
+            }
+            String content = new String(Files.readAllBytes(Paths.get(path))).trim();
+            // Ensure content starts with [ and ends with ]
+            if (!content.startsWith("[")) {
+                System.err.println("Invalid JSON format in history.json");
+                return records;
+            }
             JSONArray array = new JSONArray(content);
             for (int i = 0; i < array.length(); i++) {
                 JSONObject obj = array.getJSONObject(i);
                 records.add(HistoryRecord.fromJson(obj));
             }
-        } catch (IOException e) {
-
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();  // Optional: log error
         }
 
         return records;
     }
+
 
 
 }
