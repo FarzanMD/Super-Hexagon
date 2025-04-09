@@ -1,10 +1,7 @@
 package Controler;
 
 
-import Model.GameSettings;
-import Model.HistoryRecord;
-import Model.Obstacle;
-import Model.Player;
+import Model.*;
 import View.PauseWindow;
 //import java.util.*;
 import javax.swing.*;
@@ -59,6 +56,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     public void start() {
         timer.start();
+        if (GameSettings.isMusicEnabled()) {
+            MusicPlayer.play("assets/theme.wav", true);
+        }
+
     }
 
     @Override
@@ -325,8 +326,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                     records.add(new HistoryRecord(score, player.getName(), LocalDateTime.now().toString()));
                     saveHistory(records);
                 }
-
-
+                MusicPlayer.stop();
                 timer.stop();
                 return;
             }
@@ -346,8 +346,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
             if (isPaused) {
                 timer.stop();
+                MusicPlayer.stop();
+
             } else {
                 timer.start();
+                MusicPlayer.play("assets/theme.wav", true);
             }
 
             repaint();

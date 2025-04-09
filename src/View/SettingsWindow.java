@@ -1,5 +1,7 @@
 package View;
 
+import Model.MusicPlayer;
+
 import javax.swing.*;
 import java.awt.*;
 import static Model.GameSettings.*;
@@ -17,7 +19,17 @@ public class SettingsWindow extends JFrame {
         JCheckBox historyCheckbox = new JCheckBox("Save Game History");
         historyCheckbox.setSelected(isHistoryEnabled());
 
-        musicCheckbox.addActionListener(e -> setMusicEnabled(musicCheckbox.isSelected()));
+
+        musicCheckbox.addActionListener(e -> {
+            boolean enabled = musicCheckbox.isSelected();
+            setMusicEnabled(enabled);
+
+            if (enabled) {
+                MusicPlayer.play("assets/theme.wav", true);
+            } else {
+                MusicPlayer.stop();
+            }
+        });
         historyCheckbox.addActionListener(e -> setHistoryEnabled(historyCheckbox.isSelected()));
 
         JPanel panel = new JPanel();
