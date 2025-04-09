@@ -2,6 +2,7 @@ package Controler;
 
 
 import Model.*;
+import View.MainMenu;
 import View.PauseWindow;
 //import java.util.*;
 import javax.swing.*;
@@ -42,6 +43,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     //pause mechanics
     private boolean isPaused = false;
 
+    //Patern mechs
+    private boolean lastInBetweenWasEven = false; // False means odd, true means even was last
+
 
 
 
@@ -57,7 +61,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     public void start() {
         timer.start();
         if (GameSettings.isMusicEnabled()) {
-            MusicPlayer.play("assets/theme.wav", true);
+            MusicPlayer.GET_INSTANCE().play();
         }
 
     }
@@ -281,26 +285,61 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         repaint();
 
         //hexagonAngle += 0.01;
+
+
+        //enemy pattern
         obstacleTimer++;
         if (obstacleTimer % 100 == 0) {
             Set<Integer> chosenEdges = new HashSet<>();
-            int gapEdge = new Random().nextInt(6); // اون یه دیواری که حداقل باید باشه
-            for (int i = 0; i < 6; i++) {
-                if (i != gapEdge) {
-                    chosenEdges.add(i);
-                }
+            Random random = new Random();
+            int patternChoice = random.nextInt(3); // Randomly choose pattern: 0, 1, or 2
+
+            switch (patternChoice) {
+                case 0: // Single Gap Pattern
+                    int gapEdge = random.nextInt(6); // Randomly choose the gap
+                    for (int i = 0; i < 6; i++) {
+                        if (i != gapEdge) {
+                            chosenEdges.add(i);
+                        }
+                    }
+                    break;
+
+                case 1: // In-Between Gap Pattern (Even or Odd edges)
+                    int startEdge;
+                    if (lastInBetweenWasEven) {
+                        startEdge = 1; // Odd edges (1, 3, 5)
+                    } else {
+                        startEdge = 0; // Even edges (0, 2, 4)
+                    }
+                    for (int i = startEdge; i < 6; i += 2) {
+                        chosenEdges.add(i);
+                    }
+                    lastInBetweenWasEven = !lastInBetweenWasEven; // Flip for next time
+                    break;
+
+                case 2: // Random Gaps Pattern (like original code)
+                    int gapEdgeRandom = random.nextInt(6); // Ensure at least one gap
+                    for (int i = 0; i < 6; i++) {
+                        if (i != gapEdgeRandom) {
+                            chosenEdges.add(i);
+                        }
+                    }
+                    int toRemove = random.nextInt(5); // Remove 0 to 4 additional edges
+                    List<Integer> list = new ArrayList<>(chosenEdges);
+                    Collections.shuffle(list);
+                    for (int i = 0; i < toRemove; i++) {
+                        chosenEdges.remove(list.get(i));
+                    }
+                    break;
             }
-            // حداقل یه دیوار
-            int toRemove = new Random().nextInt(5); 
-            List<Integer> list = new ArrayList<>(chosenEdges);
-            Collections.shuffle(list);
-            for (int i = 0; i < toRemove; i++) {
-                chosenEdges.remove(list.get(i));
-            }
+
+            // Spawn obstacles on chosen edges
             for (int edge : chosenEdges) {
                 obstacles.add(new Obstacle(edge));
             }
         }
+
+
         if (score%50 == 0){
             obstacleSpeed+=0.01;
         }
@@ -326,8 +365,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                     records.add(new HistoryRecord(score, player.getName(), LocalDateTime.now().toString()));
                     saveHistory(records);
                 }
-                MusicPlayer.stop();
+                MusicPlayer.GET_INSTANCE().stop();
                 timer.stop();
+                System.exit(0);
                 return;
             }
         }
@@ -346,11 +386,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
             if (isPaused) {
                 timer.stop();
-                MusicPlayer.stop();
+                MusicPlayer.GET_INSTANCE().stop();
 
             } else {
                 timer.start();
-                MusicPlayer.play("assets/theme.wav", true);
+                MusicPlayer.GET_INSTANCE().play();
             }
 
             repaint();

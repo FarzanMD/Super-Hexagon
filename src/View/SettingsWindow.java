@@ -25,9 +25,9 @@ public class SettingsWindow extends JFrame {
             setMusicEnabled(enabled);
 
             if (enabled) {
-                MusicPlayer.play("assets/theme.wav", true);
+                MusicPlayer.GET_INSTANCE().play();
             } else {
-                MusicPlayer.stop();
+                MusicPlayer.GET_INSTANCE().stop();
             }
         });
         historyCheckbox.addActionListener(e -> setHistoryEnabled(historyCheckbox.isSelected()));
