@@ -240,7 +240,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     public void actionPerformed(ActionEvent e) {
 
         //coloring
-        // Animate even-index hues (red ↔ orange)
+        // Animate even-index hues
         if (hueEvenIncreasing) {
             hueEven += hueStepEven;
             if (hueEven > 0.1f) {
@@ -255,7 +255,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             }
         }
 
-// Animate odd-index hues (slightly offset red ↔ orange)
+// Animate odd-index hues
         if (hueOddIncreasing) {
             hueOdd += hueStepOdd;
             if (hueOdd > 0.12f) {
@@ -307,24 +307,24 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 case 1: // In-Between Gap Pattern (Even or Odd edges)
                     int startEdge;
                     if (lastInBetweenWasEven) {
-                        startEdge = 1; // Odd edges (1, 3, 5)
+                        startEdge = 1;
                     } else {
-                        startEdge = 0; // Even edges (0, 2, 4)
+                        startEdge = 0;
                     }
                     for (int i = startEdge; i < 6; i += 2) {
                         chosenEdges.add(i);
                     }
-                    lastInBetweenWasEven = !lastInBetweenWasEven; // Flip for next time
+                    lastInBetweenWasEven = !lastInBetweenWasEven;
                     break;
 
-                case 2: // Random Gaps Pattern (like original code)
-                    int gapEdgeRandom = random.nextInt(6); // Ensure at least one gap
+                case 2: // Random Gaps Pattern
+                    int gapEdgeRandom = random.nextInt(6); //least one gap
                     for (int i = 0; i < 6; i++) {
                         if (i != gapEdgeRandom) {
                             chosenEdges.add(i);
                         }
                     }
-                    int toRemove = random.nextInt(5); // Remove 0 to 4 additional edges
+                    int toRemove = random.nextInt(5); // Remove 0 to 4
                     List<Integer> list = new ArrayList<>(chosenEdges);
                     Collections.shuffle(list);
                     for (int i = 0; i < toRemove; i++) {
