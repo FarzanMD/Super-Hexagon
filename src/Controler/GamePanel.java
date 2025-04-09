@@ -4,6 +4,7 @@ package Controler;
 import Model.HistoryRecord;
 import Model.Obstacle;
 import Model.Player;
+import View.PauseWindow;
 //import java.util.*;
 import javax.swing.*;
 import javax.swing.Timer;
@@ -32,6 +33,20 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     double obstacleSpeed = 1.5;
     double rotatingSpeed = 0.01;
 
+    //colors
+    private float hueEven = 0.75f;
+    private float hueOdd = 0.86f;
+    private float hueStepEven = 0.0018f;
+    private float hueStepOdd = 0.0023f;
+    private boolean hueEvenIncreasing = true;
+    private boolean hueOddIncreasing = false;
+
+    //pause mechanics
+    private boolean isPaused = false;
+
+
+
+
 
     public GamePanel(Player player) {
         this.player = player;
@@ -52,10 +67,15 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
         //drawing score
         AffineTransform originalTransform = g2d.getTransform();
-
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 20));
         g2d.drawString("Score: " + score, 20, 30);
+
+        //drawing best score
+        List<HistoryRecord> sorted = loadHistory();
+        sorted.sort((a, b) -> Integer.compare(b.getScore(), a.getScore()));
+        int bestScore = sorted.getFirst().getScore();
+        g2d.drawString("Best Score: " + bestScore , 20 , 60);
 
         g2d.setTransform(originalTransform);
         //g2d.translate(getWidth() / 2, getHeight() / 2);
@@ -81,19 +101,24 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         //Point center = new Point(0, 0); // after translate, this is center
 
         // Land division colors
-        Color[] sectorColors = {
-                new Color(255, 0, 0, 100),     // Red
-                new Color(100, 0, 0, 100),     // Red
-                new Color(255, 0, 0, 100),     // Red
-                new Color(100, 0, 0, 100),     // Red
-                new Color(255, 0, 0, 100),     // Red
-                new Color(100, 0, 0, 100),     // Red
-                //new Color(0, 255, 0, 100),     // Green
-//                new Color(0, 0, 255, 100),     // Blue
-//                new Color(255, 255, 0, 100),   // Yellow
-//                new Color(255, 0, 255, 100),   // Magenta
-//                new Color(0, 255, 255, 100)    // Cyan
-        };
+        Color[] sectorColors = new Color[6];
+        for (int i = 0; i < 6; i++) {
+            float localHue;
+            Color base;
+            if (i % 2 == 0) {
+                localHue = (hueEven + (i * 0.005f)) % 1f;
+                base = Color.getHSBColor(localHue, 0.3f, 1f);
+            } else {
+                localHue = (hueOdd + (i * 0.005f)) % 1f;
+                base = Color.getHSBColor( localHue,0.3f, 1f);
+            }
+
+            //Color base = Color.getHSBColor(localHue, 1f, 1f);
+            sectorColors[i] = new Color(base.getRed(), base.getGreen(), base.getBlue(), 100);
+        }
+
+
+
 
         Point center = new Point(0, 0);
         int extension = 1000; // how far to extend beyond the hex
@@ -171,6 +196,34 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         );
 
 
+        //drawing Pause ( FAILED )
+        /*if (isPaused) {
+//            g2d.setTransform(new AffineTransform()); // reset transform
+//            g2d.setColor(Color.WHITE);
+//            g2d.setFont(new Font("Arial", Font.BOLD, 40));
+//            g2d.drawString("PAUSED", getWidth() / 2 -10 , getHeight() / 2 +90);
+            //new PauseWindow(g2d,this);
+        }
+         */
+
+        //coloring hexagon after everything ( FAILED )
+        /*
+        Polygon coloredHex = new Polygon();
+        for (int i = 0; i < 6; i++) {
+            double angle = i * Math.PI / 3 + hexagonAngle;
+            int x = (int) (HEX_RADIUS * Math.cos(angle));
+            int y = (int) (HEX_RADIUS * Math.sin(angle));
+            hex.addPoint(x, y);
+            hexVertices[i] = new Point(x, y);
+        }
+        //g2d.drawPolygon(coloredHex);
+        g2d.setColor(Color.DARK_GRAY);
+        g2d.fillPolygon(coloredHex);
+*/
+
+
+
+
         for (Obstacle ob : obstacles) {
             ob.draw(g2d, hexagonAngle);
         }
@@ -179,6 +232,40 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
+        //coloring
+        // Animate even-index hues (red ↔ orange)
+        if (hueEvenIncreasing) {
+            hueEven += hueStepEven;
+            if (hueEven > 0.1f) {
+                hueEven = 0.1f;
+                hueEvenIncreasing = false;
+            }
+        } else {
+            hueEven -= hueStepEven;
+            if (hueEven < 0.0f) {
+                hueEven = 0.0f;
+                hueEvenIncreasing = true;
+            }
+        }
+
+// Animate odd-index hues (slightly offset red ↔ orange)
+        if (hueOddIncreasing) {
+            hueOdd += hueStepOdd;
+            if (hueOdd > 0.12f) {
+                hueOdd = 0.12f;
+                hueOddIncreasing = false;
+            }
+        } else {
+            hueOdd -= hueStepOdd;
+            if (hueOdd < 0.02f) {
+                hueOdd = 0.02f;
+                hueOddIncreasing = true;
+            }
+        }
+
+
+
         //++ is too fast
         // score++;
         if (obstacleTimer % 10 == 0) {
@@ -248,13 +335,30 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+        int code = e.getKeyCode();
+
+        if (code == KeyEvent.VK_ESCAPE) {
+            isPaused = !isPaused;
+
+            if (isPaused) {
+                timer.stop();
+            } else {
+                timer.start();
+            }
+
+            repaint();
+            return;
+        }
+
+        if (isPaused) return; // ignore movement if paused
+
+        if (code == KeyEvent.VK_RIGHT) {
             edgeProgress += STEP;
             if (edgeProgress > 1.0) {
                 edgeProgress = 0.0;
                 currentEdge = (currentEdge + 1) % 6;
             }
-        } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+        } else if (code == KeyEvent.VK_LEFT) {
             edgeProgress -= STEP;
             if (edgeProgress < 0.0) {
                 currentEdge = (currentEdge + 5) % 6;
@@ -262,6 +366,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             }
         }
     }
+
 
     @Override
     public void keyReleased(KeyEvent e) {

@@ -3,6 +3,7 @@ package View;
 import Model.HistoryRecord;
 
 import javax.swing.*;
+import javax.swing.plaf.TableUI;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
@@ -23,6 +24,8 @@ public class HistoryWindow extends JFrame {
         String[] columns = {"Rank", "Score", "Name", "Date"};
         tableModel = new DefaultTableModel(columns, 0);
         historyTable = new JTable(tableModel);
+//        historyTable.setUI(new TableUI() {
+//        });
 
         // Fill the table
 

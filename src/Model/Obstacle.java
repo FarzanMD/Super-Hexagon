@@ -50,7 +50,7 @@ public class Obstacle {
                 (int)(outerR * Math.sin(angle))
         };
 
-        g2d.setColor(Color.RED);
+        g2d.setColor(new Color(0x00004E));
         g2d.fillPolygon(xPoints, yPoints, 4);
     }
 
