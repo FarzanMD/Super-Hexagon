@@ -2,8 +2,6 @@ package Controler;
 
 
 import Model.*;
-import View.MainMenu;
-import View.PauseWindow;
 //import java.util.*;
 import javax.swing.*;
 import javax.swing.Timer;
