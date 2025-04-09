@@ -1,6 +1,7 @@
 package Controler;
 
 
+import Model.GameSettings;
 import Model.HistoryRecord;
 import Model.Obstacle;
 import Model.Player;
@@ -319,9 +320,12 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 System.out.println("Collision detected. Bitches");
                 System.out.println("Final Score: " + score);
 
-                List<HistoryRecord> records = loadHistory();
-                records.add(new HistoryRecord(score, player.getName(), LocalDateTime.now().toString()));
-                saveHistory(records);
+                if (GameSettings.isHistoryEnabled()) {
+                    List<HistoryRecord> records = loadHistory();
+                    records.add(new HistoryRecord(score, player.getName(), LocalDateTime.now().toString()));
+                    saveHistory(records);
+                }
+
 
                 timer.stop();
                 return;

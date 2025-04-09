@@ -36,6 +36,8 @@ public class MainMenu extends JFrame {
             new HistoryWindow(records).setVisible(true);
         });
 
+        settingsButton.addActionListener(e -> new SettingsWindow().setVisible(true));
+
 
         JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
         panel.add(startButton);
