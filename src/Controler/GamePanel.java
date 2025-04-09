@@ -290,7 +290,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         if (obstacleTimer % 100 == 0) {
             Set<Integer> chosenEdges = new HashSet<>();
             Random random = new Random();
-            int patternChoice = random.nextInt(3); // Randomly choose pattern: 0, 1, or 2
+            int patternChoice = random.nextInt(3); // Randomly choose pattern
 
             switch (patternChoice) {
                 case 0: // Single Gap Pattern
